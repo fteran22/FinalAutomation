@@ -7,7 +7,7 @@ class HomePage {
     }
 
     shouldShowInformation() {
-        cy.get(INFORMATION).contains('My Accountssss');
+        cy.get(INFORMATION).contains('My Accounts');
     }
 }
 
