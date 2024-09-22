@@ -1,5 +1,5 @@
 const URL = "https://practice.automationtesting.in/";
-const INFORMATION = '#menu-item-50 > a';
+const INFORMATION = '#text-22-sub_row_1-0-1-1-0 > h2';
 
 class HomePage {
     visit() {
@@ -7,7 +7,7 @@ class HomePage {
     }
 
     shouldShowInformation() {
-        cy.get(INFORMATION).contains('My Accounts');
+        cy.get(INFORMATION).contains('new arrivals');
     }
 }
 

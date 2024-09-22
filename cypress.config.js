@@ -1,10 +1,10 @@
 const { defineConfig } = require("cypress");
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor');
-const addCucumberPreprocessorPlugin = require('@badeball/cypress-cucumber-preprocessor').addCucumberPreprocessorPlugin;
-const createEsbuildPlugin = require('@badeball/cypress-cucumber-preprocessor/esbuild').createEsbuildPlugin;
-const cucumberHtmlReporter = require('cucumber-html-reporter');
-const fs = require('fs');
+const { addCucumberPreprocessorPlugin } = require('@badeball/cypress-cucumber-preprocessor');
+const { createEsbuildPlugin } = require('@badeball/cypress-cucumber-preprocessor/esbuild');
 const path = require('path');
+const fs = require('fs');
+
 
 module.exports = defineConfig({
   e2e: {
@@ -14,39 +14,41 @@ module.exports = defineConfig({
       });
 
       on('file:preprocessor', bundler);
-
       await addCucumberPreprocessorPlugin(on, config);
 
-      // Define paths for the reports
-      const reportDir = 'F:/Automation reports'; // Define the base report directory
-      const jsonFilePath = path.join(reportDir, 'cucumber_report.json');
-      const htmlReportPath = path.join(reportDir, 'cucumber-html-report.html');
+      on('after:spec', (spec) => {
+        // Get the base name of the spec file (without the extension)
+        const baseName = path.basename(spec.name, '.feature');
+        const reportDir = config.reporterOptions.reportDir;
 
-      // Ensure that the JSON report is available
-      on('after:run', () => {
-        console.log('Report directory:', reportDir);
-        console.log('Checking for JSON report at:', jsonFilePath);
-        console.log('HTML report will be saved at:', htmlReportPath);
+        const jsonReportPath = path.join(reportDir, 'report.json');
+        const htmlReportPath = path.join(reportDir, 'report.html');
+        const newJsonReportPath = path.join(reportDir, `${baseName}-report.json`);
+        const newHtmlReportPath = path.join(reportDir, `${baseName}-report.html`);
 
-        if (fs.existsSync(jsonFilePath)) {
-          console.log('JSON report found, generating HTML report...');
-          // Create the report directory if it does not exist
-          if (!fs.existsSync(reportDir)) {
-            fs.mkdirSync(reportDir, { recursive: true });
-          }
-
-          cucumberHtmlReporter.generate({
-            jsonFile: jsonFilePath,
-            reportPath: htmlReportPath,
-            // Additional options can be added here
-          });
-        } else {
-          console.error('No cucumber_report.json file found.');
+        // Rename the JSON report
+        if (fs.existsSync(jsonReportPath)) {
+          fs.renameSync(jsonReportPath, newJsonReportPath);
         }
+
+        // Rename the HTML report
+        if (fs.existsSync(htmlReportPath)) {
+          fs.renameSync(htmlReportPath, newHtmlReportPath);
+        }
+        
       });
 
       return config;
     },
     specPattern: 'cypress/e2e/**/*.feature',
+    reporter: 'mochawesome',
+    reporterOptions: {
+      reportDir: 'cypress/reports',
+      reportFilename: 'report',
+      overwrite: false,
+      html: true,
+      json: true,
+      quiet: true,
+    },
   },
 });

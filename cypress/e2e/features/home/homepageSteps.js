@@ -8,6 +8,6 @@ When('I open the Webpage', () => {
     HomePage.visit();
 });
 
-Then('I should be able to see this information', () => {
+Then('I should be able to see New Arrivals information', () => {
     HomePage.shouldShowInformation();
 });
